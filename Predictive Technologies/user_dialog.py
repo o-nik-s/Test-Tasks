@@ -51,6 +51,9 @@ def user_dialog():
         file_source_name, file_target_name, column_predict = params_for_sarima().values()
         predictions["SARIMA"] = predict_sarima_for_data(file_source_name, file_target_name, column_predict)
     if len(predictions)>1: print(f"Объединение полученных предсказаний и учет ассортимента")
+    else: 
+        print("Завершение обработки. Не было выбрано ни одной модели!")
+        return None
     predicitions = predictions_for_data(predictions=predictions, save_all_predictions=answers["predictions"] in ["Y", "y"])
     data_assortment_predict = assortment_for_predict(predicitions)
     if data_assortment_predict is not None:
