@@ -176,4 +176,4 @@ def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=30
 
 file_source_name, file_target_name, model_source_file, model_target_file, time_for_testing = params().values()
 
-statsforecast_predict_for_data(file_source_name=file_source_name, file_target_name=file_target_name, time_for_testing=30)
+# statsforecast_predict_for_data(file_source_name=file_source_name, file_target_name=file_target_name, time_for_testing=30)
