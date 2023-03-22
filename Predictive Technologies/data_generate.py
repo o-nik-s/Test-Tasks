@@ -26,7 +26,10 @@ def generate_period(date_start, date_end):
     Генерация периода от start_date до end_date
     Возможно лучше использовать pd.date_range(start_date, end_date)
     """
-    return [date_start + dt.timedelta(i) for i in range((date_end-date_start).days + 1)]
+    dt_list = list()
+    for i in range((date_end-date_start).days + 1):
+        dt_list.append(date_start + dt.timedelta(i))
+    return dt_list
 
 
 def generate_count(start_count: int, days: int, change_days: list, total_trend=1.001, rnd=0.005) -> list:
@@ -42,18 +45,12 @@ def generate_count(start_count: int, days: int, change_days: list, total_trend=1
     return count_list
 
 
-def shuffle(days:int):
-    """
-    shuffle = периодическое случайное изменение поведения (тренда) в другую сторону / под другим углом
-    """
-    return sorted([0] + [int(random.random()*days) for _ in range(random.randint(0, days//30))])
-
-
 def season_correct(season=None):
     """
     Сезонная корректировка
     """
-    if season == None: season = random.choice(['exist', 'nothing'])
+    if season == None:
+        season = random.choice(['exist', 'nothing'])
     # if season == 'exist': season = random.choice(['week', 'month', 'quarter', 'half-year', 'year'])
     if season == 'exist': season = random.choice(['week', 'month'])
     season_change = {'nothing': lambda x, date, k: x,
@@ -72,18 +69,18 @@ def generate_counts_for_item(dt_list, start_count, days, change_days, total_tren
     return counts
 
 
-def generate_assortment_periods(start_date, end_date, days_between=15, days_assortment=60):
+def generate_assortment_periods(start_date, finish_date, days_between=15, days_assortment=60):
     """
     Генерирует периоды для ассортимента
     """
     assort_date_list = list()
     curr_date = start_date - dt.timedelta(days=2)
-    while curr_date < end_date:
+    while curr_date < finish_date:
         start_date = curr_date + dt.timedelta(days=random.randint(2, days_between))
         curr_date = start_date + dt.timedelta(days=random.randint(0, days_assortment))
         assort_date_list.append([start_date, curr_date])
-    if assort_date_list[-1][0] > end_date: assort_date_list.pop()
-    assort_date_list[-1][1] = min(assort_date_list[-1][1], end_date)
+    if assort_date_list[-1][0] > finish_date: assort_date_list.pop()
+    assort_date_list[-1][1] = min(assort_date_list[-1][1], finish_date)
     return assort_date_list
 
 
@@ -101,20 +98,28 @@ def assort_shop_item_count(shop_item_counts, assortment_data, shop, item):
     return assort_list
 
 
-def save_data(data_list:list, file_name:str, data_columns:list):
+def shuffle(days): 
+    """
+    shuffle = периодическое случайное изменение поведения (тренда) в другую сторону / под другим углом
+    """
+    return sorted([0] + [int(random.random()*days) for _ in range(days//30)])
+
+
+
+def save_data(data_list:list, file_name:str):
     """
     Сохранение данных в файл
     """
 
     time_start = time.time()
-    pd.DataFrame(data_list).rename(columns={i: col for i, col in enumerate(data_columns)}).to_csv(file_name)
+    data = pd.DataFrame(data_list).rename(columns={0:'Shop', 1:'Item', 2:'Date', 3:'Number'})
+    data.to_csv(file_name)
     print(6, time.time() - time_start)
  
     # with open(file_name, 'w') as file:
-    #     file.write(','.join(data_columns)+'\n')
+    #     file.write(','.join(['Shop', 'Item', 'Date', 'Number'])+'\n')
     #     file.write('\n'.join(map(lambda x: ','.join(map(str,x)), data_list)))
     # print(7, time.time() - time_start)
-    # time_start = time.time()
 
 
 def generate_data(params:dict):
@@ -146,8 +151,9 @@ def generate_data(params:dict):
     print(1, time.time() - time_start)
     time_start = time.time()
 
-    item_counts = {item: generate_counts_for_item(dt_list=dt_list, start_count=start_counts[i], days=days, 
-                                                  change_days=shuffle(days), total_trend=1) for i, item in enumerate(items)}
+    item_counts = {item: generate_counts_for_item(dt_list=dt_list,
+        start_count=start_counts[i], days=days, change_days=shuffle(days),
+        total_trend=1) for i, item in enumerate(items)}
 
 
     print(2, time.time() - time_start)
@@ -163,7 +169,7 @@ def generate_data(params:dict):
     print(3, time.time() - time_start)
 
 
-    forecast_date = date_end + relativedelta(weeks=+days//7)
+    forecast_date = date_end + relativedelta(weeks=+4)
     assortment_data = {(s, i): generate_assortment_periods(date_start, forecast_date) for i in items for s in shops}
 
 
@@ -176,10 +182,10 @@ def generate_data(params:dict):
     print(5, time.time() - time_start)
     time_start = time.time()
     
-    save_data(data_list=data_list, file_name=file_target_name, data_columns=data_columns)
+    save_data(data_list=data_list, file_name=file_target_name)
     
     assort_future_list = [(shop, item, max(date_end+dt.timedelta(days=1), date_1), date_2) for shop in shops for item in items for date_1, date_2 in assortment_data[(shop, item)] if date_2>date_end]
-    pd.DataFrame(assort_future_list).rename(columns={0:data_columns[0], 1:data_columns[1], 2:'Date_1', 3:'Date_2'}).to_csv(file_target_name_assort, index=False)
+    pd.DataFrame(assort_future_list).rename(columns={0: data_columns[0], 1: data_columns[1], 2:'Date_1', 3:'Date_2'}).to_csv(file_target_name_assort, index=False)
 
 
 

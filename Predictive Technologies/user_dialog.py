@@ -1,6 +1,6 @@
 import os.path
 
-from generate_data import params_for_generate, generate_data
+from data_generate import params_for_generate, generate_data
 from gaps_filling import params_for_filling, filling_gaps
 from params import params_for_statsforecast, params_for_prophet, params_for_sarima
 from predict_statsforecast import statsforecast_predict_for_data
