@@ -17,8 +17,7 @@ def unioin_predictions(predict_models:dict, predict_columns:str):
             predict_df[predict_columns[1]] = np.minimum(np.array(predict_df[predict_columns[1]]), np.array(pred_df[predict_columns[1]]))
             predict_df[predict_columns[2]] = np.maximum(np.array(predict_df[predict_columns[2]]), np.array(pred_df[predict_columns[2]]))
     predict = [0 for _ in range(len(predict_df))]
-    for col in predict_models.keys():
-        predict += predict_df[col].values
+    for col in predict_models.keys(): predict += predict_df[col].values
     predict = predict/len(predict_models.values())
     predict_df[predict_columns[0]] = list(map(round, predict))
     predict_df = predict_df[[col for col in predict_df.columns if col not in predict_columns] + predict_columns]

@@ -100,7 +100,7 @@ def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=30
     params = params_for_dataset(file_source_name) | params_for_predict()
 
     data, column_predict, date_start, date_end, shops, items, data_item_shop, item_shop_list, date_split, \
-        column_date, period_future, freq, season_length, lags, level, metrics = params.values()
+        column_date, period_future, freq, season_length, lags, level, metrics, predict_columns = params.values()
     level *= 100
 
     data_item_shop = data_item_shop.rename(columns={"Date": "ds", column_predict: "Y"})
@@ -124,7 +124,7 @@ def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=30
 
     if "unique_id" not in data_item_shop.columns: data_item_shop["unique_id"] = 1
 
-    predict_columns = {"ds": "Date", best_model_name: "Predict", f'{best_model_name}-lo-{level}': 'Min', f'{best_model_name}-hi-{level}': 'Max'}
+    predict_columns = {"ds": "Date", best_model_name: predict_columns[0], f'{best_model_name}-lo-{level}': predict_columns[1], f'{best_model_name}-hi-{level}': predict_columns[2]}
     predict_column_types = {value: int for value in list(predict_columns.values())[1:]}
 
     season_in_model = hasattr(best_model, "season_length")
@@ -149,7 +149,8 @@ def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=30
     if len(data_predict.columns)>4: 
         for col in list(predict_columns.values())[1:]: data_predict[col] = data_predict[col].apply(lambda x: max(0, x))
     else: slicer = slice(1, 2)
-    data_predict = data_predict[cnst.column_names + list(predict_columns.values())[slicer]].astype(predict_column_types)
+    data_predict = data_predict[cnst.column_names + list(predict_columns.values())[slicer]]
+    data_predict = data_predict.astype({col: typ for col, typ in predict_column_types.items() if col in data_predict.columns})
     data_predict.sort_values(["Shop", "Item"], inplace=True)
     
     if file_target_name is not None: data_predict.to_csv(file_target_name, index=False)
@@ -159,4 +160,4 @@ def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=30
 
 file_source_name, file_target_name, model_source_file, model_target_file, time_for_testing = params().values()
 
-# statsforecast_predict_for_data(file_source_name=file_source_name, file_target_name=file_target_name, model_source_file=model_source_file)
+# statsforecast_predict_for_data(file_source_name=file_source_name, file_target_name=file_target_name, time_for_testing=30)

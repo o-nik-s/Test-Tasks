@@ -5,6 +5,8 @@ import warnings
 import os.path
 
 from params import params_for_accortment
+from functions_common import del_el_from_list
+import constants as cnst
 
 
 warnings.filterwarnings('ignore')
@@ -25,8 +27,8 @@ def assortment_for_predict(data:pd.DataFrame=None):
     else: 
         print(f"Error assortment_for_predict: Остутствует файл {file_assort_name} с планируемым ассортиментом!")
         return None
-    data_shop_item = data.groupby(["Shop", "Item", "Date"]).mean().reset_index(["Date"])[["Date"] + predict_columns].sort_index()
-    data_assortment = data_assortment.set_index(["Shop", "Item"])
+    data_shop_item = data.groupby(cnst.column_names).mean().reset_index(["Date"])[["Date"] + predict_columns].sort_index()
+    data_assortment = data_assortment.set_index(del_el_from_list(cnst.column_names,"Date"))
 
     data_assortment_predict = pd.DataFrame()
     data_shop_item_indx = data_shop_item.index.unique()

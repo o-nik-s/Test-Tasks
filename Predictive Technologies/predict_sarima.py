@@ -11,8 +11,10 @@ from dateutil.relativedelta import relativedelta
 
 from functions_common import define_seasonal_len
 from prepare_data import reindex
-from generate_data import generate_period
+from data_generate import generate_period
 from params import params_for_predict, params_for_dataset, params_for_sarima as params
+
+import constants as cnst
 
 
 warnings.filterwarnings('ignore')
@@ -32,8 +34,10 @@ def trend_exist(time_series):
 def use_boxcox(data_analysis, column_predict):
     flag_boxcox, lmbda = False, 1
     if trend_exist(data_analysis[column_predict]): 
-        data_analysis['data_box'], lmbda = stats.boxcox(data_analysis[column_predict])
-        flag_boxcox = True
+        try: 
+            data_analysis['data_box'], lmbda = stats.boxcox(data_analysis[column_predict])
+            flag_boxcox = True
+        except Exception as e: pass # По хорошему надо разбираться с ошибкой, здесь опустим
         if lmbda is None: lmbda = 1
     analysis_column = 'data_box' if flag_boxcox else column_predict
     return data_analysis, lmbda, flag_boxcox, analysis_column
@@ -84,10 +88,10 @@ def sarima_predict_for_data(file_source_name:str, file_target_name:str, sarima_p
     params = params_for_dataset(file_source_name) | params_for_predict()
 
     data, column_predict, date_start, date_end, shops, items, data_item_shop, item_shop_list, date_split, \
-        column_date, period_future, freq, season_length, lags, level, metrics = params.values()
+        column_date, period_future, freq, season_length, lags, level, metrics, predict_columns = params.values()
 
     data.Date = pd.to_datetime(data.Date)
-    data.asfreq('D')
+    data.asfreq(freq)
 
     forecast_start_date = date_end + relativedelta(days=1)
     date_list = generate_period(forecast_start_date, forecast_start_date + relativedelta(days=period_future-1)) #[datetime.datetime.strptime(forecast_start_date, "%Y-%m-%d") + relativedelta(days=x) for x in range(0, count)]
@@ -127,7 +131,7 @@ def sarima_predict_for_data(file_source_name:str, file_target_name:str, sarima_p
         pred_ci = pred_uc.conf_int(alpha=1-level)
         future_ci = invboxcox(pred_ci, lmbda) if flag_boxcox else pred_ci
         forecast = pd.concat([forecast, future_ci], axis=1)
-        forecast.columns = ["Predict", "Min", "Max"]
+        forecast.columns = predict_columns
         for col in forecast.columns: forecast[col] = forecast[col].apply(lambda x: max(0, x))
         forecast = forecast.astype(int)
         forecast["Date"] = date_list
@@ -135,7 +139,7 @@ def sarima_predict_for_data(file_source_name:str, file_target_name:str, sarima_p
         forecast["Item"] = len(forecast)*[item]
         data_predict = pd.concat([data_predict, forecast], axis=0)
     
-    data_predict = data_predict[['Shop', 'Item', "Date", "Predict", "Min", "Max"]]
+    data_predict = data_predict[cnst.column_names + predict_columns]
     data_predict.sort_values(["Shop", "Item"], inplace=True)
     
     if file_target_name is not None: data_predict.to_csv(file_target_name, index=False)

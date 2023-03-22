@@ -19,7 +19,6 @@ def prophet_params():
 
     params = dict()
     params['weekly_seasonality'] = True
-    # params['interval_width'] = 0.95
     
     return params
 
@@ -47,8 +46,7 @@ def prophet_test_model(Y_train_df:pd.DataFrame, Y_test_df:pd.DataFrame, periods,
     """
     Y_predict_df = prophet_predict(Y_train_df, period_future=periods, freq=freq, level=level, include_history = False)
     metric_test_dict = dict()
-    for metric in metrics:
-        metric_test_dict[metric] = metrics_func[metric](Y_test_df, Y_predict_df)
+    for metric in metrics: metric_test_dict[metric] = metrics_func[metric](Y_test_df, Y_predict_df)
     return metric_test_dict
 
 
@@ -60,10 +58,10 @@ def prophet_predict_for_data(file_source_name:str, file_target_name:str=None, co
     params = params_for_dataset(file_source_name) | params_for_predict()
 
     data, column_predict, date_start, date_end, shops, items, data_item_shop, item_shop_list, date_split, \
-        column_date, period_future, freq, season_length, lags, level, metrics = params.values()
+        column_date, period_future, freq, season_length, lags, level, metrics, predict_columns = params.values()
     
     data_item_shop = data_item_shop.rename(columns={"Date": "ds", column_predict: "y"})
-    predict_columns = {"ds": "Date", "yhat": "Predict", 'yhat_lower': 'Min', 'yhat_upper': 'Max'}
+    predict_columns = {"ds": "Date", "yhat": predict_columns[0], 'yhat_lower': predict_columns[1], 'yhat_upper': predict_columns[2]}
     predict_column_types = {value: int for value in list(predict_columns.values())[1:]}
     
     
@@ -85,8 +83,7 @@ def prophet_predict_for_data(file_source_name:str, file_target_name:str=None, co
         forecast_df["Item"] = len(forecast_df)*[item]
         data_predict = pd.concat([data_predict, forecast_df], axis=0)
     
-    for col in list(predict_columns)[1:]:
-        data_predict[col] = data_predict[col].apply(lambda x: max(0, x))
+    for col in list(predict_columns)[1:]: data_predict[col] = data_predict[col].apply(lambda x: max(0, x))
     
     data_predict.rename(columns=predict_columns, inplace=True)
     data_predict = data_predict[cnst.column_names+list(predict_columns.values())[1:]].astype(predict_column_types)

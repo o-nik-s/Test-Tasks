@@ -13,6 +13,14 @@ rmse = lambda y_true, y_pred: np.sqrt(mse(y_true, y_pred))
 metrics_func = {'mae': mae, 'mse': mse, "rmse": rmse, "r2": r2, "mape":mape, 'mdae': mdae}
 
 
+def del_el_from_list(lst:list, el):
+    """
+    Функция, которая удаляет заданный элемент из списка по значению и сразу же возвращает список
+    """
+    lst.remove(el)
+    return lst
+
+
 def define_seasonal_len(time_series):
     """
     Вычисляет сезонность временного ряда

@@ -1,8 +1,37 @@
+import pandas as pd
 import datetime as dt
 from itertools import product
 from dateutil.relativedelta import relativedelta
 
-from prepare_data import prepare_data
+
+
+"""
+По хорошему вообще не привязываться к shop и item и использовать абстрактные параметры.
+Но что-то сразу не придумала, какие конкретно они должны быть и в рамках данной конкретной задачи shop и item достаточно.
+При наличии готового кода и хорошей IDE переименовать поля в нужные имена большого труда не составит (если делаешь для самого себя, конечно).
+"""
+
+
+def prepare_data(file_source_name:str):
+    """
+    Считываение файла и подготовка базовых констант для работы.
+    """
+    
+    data = pd.read_csv(file_source_name)
+
+    data.Date = pd.to_datetime(data.Date)
+    date_start = min(data.Date)
+    date_end = max(data.Date)
+
+    shops = data.Shop.unique()
+    items = data.Item.unique()
+    
+    data_info = {"date_start": date_start, 
+                 "date_end": date_end, 
+                 "shops": shops, 
+                 "items": items}
+    
+    return data, data_info
 
 
 def params_for_dataset(file_source_name:str, column_predict:str="Rolling_Number"):
@@ -45,13 +74,16 @@ def params_for_generate():
     date_start = dt.date(2020, 1, 1)
     date_end = date_start + relativedelta(years=3) - relativedelta(days=1)
     
+    data_columns = ['Shop', 'Item', 'Date', 'Number']
+    
     params = {"file_target_name": file_target_name, 
               "file_target_name_assort": file_target_name_assort,
               "shops_count": shops_count, 
               "items_count": items_count, 
               "date_start": date_start,
               "date_end": date_end, 
-              "random_seed": random_seed}
+              "random_seed": random_seed,
+              "columns": data_columns}
     
     return params
 
@@ -62,8 +94,12 @@ def params_for_filling():
     """
     name_source_file = "data.csv"
     name_target_file = "data_fill.csv"
+    source_column = "Number"
+    target_column = "Rolling_Number"
     params = {"name_source_file": name_source_file, 
-              "name_target_file": name_target_file}
+              "name_target_file": name_target_file,
+              "source_column": source_column,
+              "target_column": target_column}
     return params
 
 
@@ -83,6 +119,8 @@ def params_for_predict():
         dict: {метрика: вес}
     """
     metrics = {"mae": 2, "mse": 3, "rmse": 3, "r2": 0, "mdae": 2, "mape": 2}
+    
+    predict_columns = ["Predict", "Min", "Max"]
 
     params = {"column_date": column_date, 
               "period_future": period_future, 
@@ -90,7 +128,8 @@ def params_for_predict():
               "season_length": season_length, 
               "lags": lags, 
               "level": level, 
-              "metrics": metrics}
+              "metrics": metrics,
+              "predict_columns": predict_columns}
     
     return params
 
@@ -142,7 +181,7 @@ def params_for_sarima():
     file_source_name = 'data_fill.csv'
     file_target_name = 'data_predict_sarima.csv'
 
-    ps, qs, Ps, Qs, d, D = range(0, 4), range(0, 4), range(0, 2), range(0, 2), 1, 1
+    ps, qs, Ps, Qs, d, D = range(0, 5), range(0, 5), range(0, 3), range(0, 3), 1, 1
     parameters_list = list(product(ps, qs, Ps, Qs))
     sarima_params = {'parameters': [ps, qs, Ps, Qs, d, D],
                      'parameters_list': parameters_list}
