@@ -96,4 +96,5 @@ def prophet_predict_for_data(file_source_name:str, file_target_name:str=None, co
 
 file_source_name, file_target_name, column_predict = params().values()
 
-# prophet_predict_for_data(file_source_name, file_target_name, column_predict)
+if __name__ == '__main__':
+    prophet_predict_for_data(file_source_name, file_target_name, column_predict)

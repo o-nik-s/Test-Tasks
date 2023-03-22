@@ -189,4 +189,5 @@ def generate_data(params:dict):
 
 
 
-# generate_data(params_for_generate())
+if __name__ == '__main__':
+    generate_data(params_for_generate())

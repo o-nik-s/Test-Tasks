@@ -102,4 +102,5 @@ def filling_gaps(params:dict):
     data_fill.astype({target_column: int}).reset_index()[cnst.column_names + [source_column, target_column]].to_csv(file_name_target, index=False)
 
 
-# filling_gaps(params_for_filling())
+if __name__ == '__main__':
+    filling_gaps(params_for_filling())

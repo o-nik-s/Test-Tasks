@@ -46,4 +46,5 @@ def assortment_for_predict(data:pd.DataFrame=None):
     return data_assortment_predict
 
 
-# assortment_for_predict()
+if __name__ == '__main__':
+    assortment_for_predict()

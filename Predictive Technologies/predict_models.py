@@ -36,6 +36,8 @@ def predictions_for_data(predictions:dict=None, predict_columns:list=None, save_
         predictions = dict()
         for file in file_source_names:
             data_predict = pd.read_csv(file)
+            print(file)
+            print(data_predict)
             predictions[file.split('.')[0].split('_')[-1].capitalize()] = pd.DataFrame(data_predict.values, columns=column_names).sort_values(column_names[:2])
     predictions = unioin_predictions(predictions, predict_columns)
     if not save_all_predictions: predictions = predictions[column_names]
@@ -44,4 +46,5 @@ def predictions_for_data(predictions:dict=None, predict_columns:list=None, save_
     return predictions
 
 
-# predictions_for_data(save_all_predictions=True)
+if __name__ == '__main__':
+    predictions_for_data(save_all_predictions=True)
