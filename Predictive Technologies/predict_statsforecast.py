@@ -20,6 +20,9 @@ warnings.filterwarnings('ignore')
 
 
 def statsforecast_params(season_length:int, lags:int):
+    """ 
+    Задает параметры модели StatsForecast 
+    """
 
     dict_models = \
         {"AutoARIMA": AutoARIMA(season_length=season_length),
@@ -40,6 +43,9 @@ def statsforecast_params(season_length:int, lags:int):
 
 
 def statsforecast_predict(Y_train_df, models, freq, horizon, level=None):
+    """ 
+    Обучение модели StatsForecast и построение предсказания на ее основе 
+    """
     sf = StatsForecast(
         df=Y_train_df,
         models=models,
@@ -52,6 +58,9 @@ def statsforecast_predict(Y_train_df, models, freq, horizon, level=None):
 
 
 def statsforecast_testing(df, column_date, date_split, models, freq, level, metrics):
+    """
+    Тестирование модели Statsforecast
+    """
     Y_train_df, Y_test_df = split_df(df, column_date, date_split)
     horizon = len(Y_test_df)
     Y_predict_df = statsforecast_predict(Y_train_df, models=models, freq=freq, horizon=horizon) 
@@ -65,7 +74,10 @@ def statsforecast_testing(df, column_date, date_split, models, freq, level, metr
 
 
 def statsforecast_test_models(params:dict, time_for_testing:int, best_count:int = 5):
-    
+    """
+    Тестирование моделей Statsforecast
+    """
+        
     data_item_shop, item_shop_list, column_predict, column_date, date_split, models, freq, metrics, level = \
         params["data_item_shop"], params["item_shop_list"], params["column_predict"], params["column_date"], params["date_split"], params["dict_models"].values(), \
         params["freq"], params["metrics"], params["level"]
@@ -96,6 +108,9 @@ def statsforecast_test_models(params:dict, time_for_testing:int, best_count:int 
 
 
 def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=300, model_source_file:str=None, model_target_file:str=None, file_target_name:str=None):
+    """
+    Предсказания для датасета на основе модели Statsforecast
+    """
     
     params = params_for_dataset(file_source_name) | params_for_predict()
 
@@ -160,4 +175,4 @@ def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=30
 
 file_source_name, file_target_name, model_source_file, model_target_file, time_for_testing = params().values()
 
-# statsforecast_predict_for_data(file_source_name=file_source_name, file_target_name=file_target_name, time_for_testing=30)
+statsforecast_predict_for_data(file_source_name=file_source_name, file_target_name=file_target_name, time_for_testing=30)

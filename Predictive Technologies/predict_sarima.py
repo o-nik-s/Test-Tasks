@@ -27,11 +27,17 @@ Student_test = lambda series, init: stats.ttest_1samp(series[init:], 0) #[1]
 
 
 def trend_exist(time_series):
+    """
+    Проверяет наличие тренда на основе максимальной разницы между сглаженными значениями
+    """
     time_series_rolling = time_series.rolling(window=len(time_series)//100,min_periods=1,center=True,win_type="nuttall").mean()
     return time_series_rolling.mean()/1000 < max(time_series_rolling.values) - min(time_series_rolling.values)
 
 
 def use_boxcox(data_analysis, column_predict):
+    """
+    Применяет к временному ряду преобразование Бокса-Кокса
+    """
     flag_boxcox, lmbda = False, 1
     if trend_exist(data_analysis[column_predict]): 
         try: 
@@ -44,6 +50,11 @@ def use_boxcox(data_analysis, column_predict):
 
 
 def series_differentiation(data:pd.DataFrame):
+    """
+    Дифференцирует ВР, пока критерий Дикки-Фуллера не покажет стационарность
+    В будущем названия полей следует вынести в отдельный параметр
+    """
+
     data['data_box_diff_0'] = data.data_box
     i, init = 0, 0
     while Dickey_Fuller_test(data[f'data_box_diff_{i}'], init)[1]>10E-7:
@@ -55,6 +66,9 @@ def series_differentiation(data:pd.DataFrame):
 
 
 def trend_for_sarima(time_series):
+    """
+    Задает показатель тренда для SARIMA-модели
+    """
     if trend_exist(time_series): 
         trend = 'tc' if abs(time_series.mean())>0.01 else 't'
     else: trend = 'n'
@@ -62,11 +76,19 @@ def trend_for_sarima(time_series):
 
 
 def study_sarima_model(time_series, param:list, S:int, d=1, D=1):
+    """
+    Обучение SARIMA-модели с заданными параметрами
+    """
     return sm.tsa.statespace.SARIMAX(time_series, order=(param[0], d, param[1]), 
-                                        seasonal_order=(param[2], D, param[3], S)).fit(disp=-1)
+                                     seasonal_order=(param[2], D, param[3], S)).fit(disp=-1)
 
 
 def define_best_model(time_series, parameters_list:list, S:int):
+    """
+    Определение оптимальной модели по критерию Акаике
+    С учетом автоматических расчетов, и, как следствие, не принципиальной важности количества параметров, 
+    критерий можно изменить на другой
+    """
     results = list()
     best_aic = float("inf")
     print("Выбор наиболее оптимальной модели:")
@@ -84,6 +106,9 @@ def define_best_model(time_series, parameters_list:list, S:int):
 
 
 def sarima_predict_for_data(file_source_name:str, file_target_name:str, sarima_params:dict):
+    """
+    Предсказания для датасета на основе модели SARIMA
+    """
 
     params = params_for_dataset(file_source_name) | params_for_predict()
 
@@ -103,13 +128,11 @@ def sarima_predict_for_data(file_source_name:str, file_target_name:str, sarima_p
 
     S = define_seasonal_len(data_for_predict[analysis_column])
 
-    parameters, parameters_list = sarima_params['parameters'], sarima_params['parameters_list']
-    
-    ps, qs, Ps, Qs, d, D = parameters
-
+    _, parameters_list = sarima_params['parameters'], sarima_params['parameters_list']
+        
+    # Тестируем всем скопом, поскольку времени тестировать индивидуально нет; по хорошему хотя бы разные модели по разным продуктам
     best_model, best_param, results = define_best_model(data_for_predict[analysis_column], parameters_list, S)
 
-    # Тестируем всем скопом, поскольку времени тестировать индивидуально нет; по хорошему хотя бы разные модели по разным продуктам
     print("Прогнозируем на основе модели ARIMA:")
     start = None
     item_shop_indx = data.groupby(["Item", "Shop"]).agg('mean').index
