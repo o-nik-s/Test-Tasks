@@ -130,7 +130,11 @@ def sarima_predict_for_data(file_source_name:str, file_target_name:str, sarima_p
 
     _, parameters_list = sarima_params['parameters'], sarima_params['parameters_list']
         
-    # Тестируем всем скопом, поскольку времени тестировать индивидуально нет; по хорошему хотя бы разные модели по разным продуктам
+    """
+    Тестируем всем скопом, поскольку времени тестировать индивидуально нет
+    По хорошему хотя бы разные модели по разным продуктам
+    Можно использовать методы кластеризации временных рядов.
+    """
     best_model, best_param, results = define_best_model(data_for_predict[analysis_column], parameters_list, S)
 
     print("Прогнозируем на основе модели ARIMA:")

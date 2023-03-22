@@ -169,7 +169,7 @@ def generate_data(params:dict):
     print(3, time.time() - time_start)
 
 
-    forecast_date = date_end + relativedelta(weeks=+4)
+    forecast_date = date_end + relativedelta(weeks=+days//7)
     assortment_data = {(s, i): generate_assortment_periods(date_start, forecast_date) for i in items for s in shops}
 
 

@@ -130,6 +130,7 @@ def statsforecast_predict_for_data(file_source_name:str, time_for_testing:int=30
         '''
         За отсутствием времени тестируем сразу на всех продуктах и всех магазинах скопом. 
         Ясно, что по хорошему в разных ситуациях следует использовать разные модели.
+        Можно использовать методы кластеризации временных рядов.
         '''
         dct_result = statsforecast_test_models(params | param_statsforecast, time_for_testing=time_for_testing)
         best_model_name = sorted(dct_result.items(), key=lambda x: x[1], reverse=True)[0][0]
