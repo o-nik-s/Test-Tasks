@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 """
 По хорошему вообще не привязываться к shop и item и использовать абстрактные параметры.
-Но что-то сразу не придумала, какие конкретно они должны быть и в рамках данной конкретной задачи shop и item достаточно.
+Но что-то сразу не придумала, какие конкретно они должны быть, и в рамках данной конкретной задачи shop и item достаточно.
 При наличии готового кода и хорошей IDE переименовать поля в нужные имена большого труда не составит (если делаешь для самого себя, конечно).
 """
 
@@ -114,11 +114,13 @@ def params_for_predict():
         
     level = 0.95
     
-    """ Дает возможность использовать взвешенные метрики
+    """ 
+    Дает возможность использовать взвешенные метрики
+    Для метрик, где важно больше значение, вроде R2, вес указывать отрицательный
     Returns:
         dict: {метрика: вес}
     """
-    metrics = {"mae": 2, "mse": 3, "rmse": 3, "r2": 0, "mdae": 2, "mape": 2}
+    metrics = {"mae": 2, "mse": 3, "rmse": 3, "r2": 0, "mdae": 2, "mape": 2} 
     
     predict_columns = ["Predict", "Min", "Max"]
 
@@ -199,7 +201,9 @@ def params_for_predictions():
     Параметры для общих предсказаний
     """
     
-    file_source_names = ['data_predict_statsforecast.csv', 'data_predict_prophet.csv'] 
+    file_source_names = ['data_predict_statsforecast.csv', 
+                         'data_predict_prophet.csv', 
+                         'data_predict_sarima.csv'] 
     file_target_name = 'data_predictions.csv'
 
     predict_columns = ["Predict", "Min", "Max"]
