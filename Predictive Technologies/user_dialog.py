@@ -19,7 +19,7 @@ def user_dialog():
     
     answers = dict()
     answers["generate_data"] = input("Требуется сгенерировать данные? Y/N ")
-    answers["filling_data"] = input("Требуется обработать данные? Y/N ") if answers["generate_data"] not in ["Y", "y"] else "Y"
+    answers["filling_data"] = input("Требуется обработать данные? Y/N ") if answers["generate_data"] in ["Y", "y"] else "Y"
     answers["statsforecast"] = input("Использовать пакет Statsforecast? Y/N ")
     if answers["statsforecast"] in ["Y", "y"]:
         file_source_name, file_target_name, model_source_file, model_target_file, time_for_testing = params_for_statsforecast().values()
