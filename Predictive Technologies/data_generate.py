@@ -1,9 +1,11 @@
 import math
 import random
 import time
+
 import pandas as pd
 import numpy as np
 import datetime as dt
+
 from scipy.stats import lognorm
 from dateutil.relativedelta import relativedelta
 
@@ -26,10 +28,7 @@ def generate_period(date_start, date_end):
     Генерация периода от start_date до end_date
     Возможно лучше использовать pd.date_range(start_date, end_date)
     """
-    dt_list = list()
-    for i in range((date_end-date_start).days + 1):
-        dt_list.append(date_start + dt.timedelta(i))
-    return dt_list
+    return [date_start + dt.timedelta(i) for i in range((date_end-date_start).days + 1)]
 
 
 def generate_count(start_count: int, days: int, change_days: list, total_trend=1.001, rnd=0.005) -> list:
@@ -49,8 +48,7 @@ def season_correct(season=None):
     """
     Сезонная корректировка
     """
-    if season == None:
-        season = random.choice(['exist', 'nothing'])
+    if season == None: season = random.choice(['exist', 'nothing'])
     # if season == 'exist': season = random.choice(['week', 'month', 'quarter', 'half-year', 'year'])
     if season == 'exist': season = random.choice(['week', 'month'])
     season_change = {'nothing': lambda x, date, k: x,
@@ -106,13 +104,13 @@ def shuffle(days):
 
 
 
-def save_data(data_list:list, file_name:str):
+def save_data(data_list:list, file_name:str, columns):
     """
     Сохранение данных в файл
     """
 
     time_start = time.time()
-    data = pd.DataFrame(data_list).rename(columns={0:'Shop', 1:'Item', 2:'Date', 3:'Number'})
+    data = pd.DataFrame(data_list).rename(columns= {i : name for (i, name) in enumerate(columns)} | {3:'Number'})
     data.to_csv(file_name)
     print(6, time.time() - time_start)
  
@@ -182,7 +180,7 @@ def generate_data(params:dict):
     print(5, time.time() - time_start)
     time_start = time.time()
     
-    save_data(data_list=data_list, file_name=file_target_name)
+    save_data(data_list=data_list, file_name=file_target_name, columns=data_columns)
     
     assort_future_list = [(shop, item, max(date_end+dt.timedelta(days=1), date_1), date_2) for shop in shops for item in items for date_1, date_2 in assortment_data[(shop, item)] if date_2>date_end]
     pd.DataFrame(assort_future_list).rename(columns={0: data_columns[0], 1: data_columns[1], 2:'Date_1', 3:'Date_2'}).to_csv(file_target_name_assort, index=False)
