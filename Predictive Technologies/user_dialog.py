@@ -27,7 +27,7 @@ def user_dialog():
             answers["statsforecast_testing_time"] = int(input("Сколько времени готовы потратить на тестирование моделей (в секундах)?: "))
     answers["prophet"] = input("Использовать пакет Prophet? Y/N ")
     answers["sarima"] = input("Использовать пакет SARIMA? Y/N ")
-    answers["predictions"] = "Y" # input("Сохранить предсказания всех моделей? Y/N ") if len(predictions)>1 else "N"
+    answers["predictions"] = input("Сохранить предсказания всех моделей? Y/N ")
 
     
     if answers["generate_data"] in ["Y", "y"]:
@@ -41,7 +41,6 @@ def user_dialog():
         if os.path.isfile(model_target_file):
             predictions["Statsforecast"] = predict_statsforecast_for_data(file_source_name=file_source_name, model_source_file=model_source_file, file_target_name=file_target_name)
         else:
-            answers["statsforecast_testing_time"] = int(input("Сколько времени готовы потратить на тестирование моделей (в секундах)?: "))
             predictions["Statsforecast"] = predict_statsforecast_for_data(file_source_name=file_source_name, time_for_testing=answers["statsforecast_testing_time"], model_target_file=model_target_file, file_target_name=file_target_name)
     if answers["prophet"] in ["Y", "y"]:
         print(f"Построение модели с помощью prophet")
@@ -52,6 +51,9 @@ def user_dialog():
         file_source_name, file_target_name, column_predict = params_for_sarima().values()
         predictions["SARIMA"] = predict_sarima_for_data(file_source_name, file_target_name, column_predict)
     if len(predictions)>1: print(f"Объединение полученных предсказаний и учет ассортимента")
+    else: 
+        print("Завершение обработки. Не было выбрано ни одной модели!")
+        return None
     predicitions = predictions_for_data(predictions=predictions, save_all_predictions=answers["predictions"] in ["Y", "y"])
     data_assortment_predict = assortment_for_predict(predicitions)
     if data_assortment_predict is not None:
