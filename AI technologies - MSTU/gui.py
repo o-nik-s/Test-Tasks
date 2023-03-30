@@ -6,7 +6,6 @@ import constant as cnst
 
 
 def gui():
-
     
 
     def select_class():
@@ -23,13 +22,15 @@ def gui():
         root.update()
         target_column = "10" if selected_class.get() == "Instance class" else "1"
         program(target_column,  forecast_check.get())
-        label["text"] = f"Модели успешно построены.\nРезультаты тестирования моделей смотрите в файле {cnst.testing_result_file}."
+        text = f"Модели успешно построены. \nРезультаты тестирования моделей \nсмотрите в файле {cnst.testing_result_file}.\n" + \
+            f"Результаты предсказаний смотрите в файлах {cnst.prediction_file} \nи {cnst.prediction_another_file}"
+        label["text"] = text
         btn["state"] = ["enabled"]
 
 
     root = Tk()
     root.title("Построение модели анализа данных")
-    root.geometry("350x200+400+150")
+    root.geometry("350x230+400+150")
 
     position = {"padx":6, "pady":6, "anchor":NW}
 
