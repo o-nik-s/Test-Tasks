@@ -2,10 +2,12 @@ from tkinter import *
 from tkinter import ttk
 
 from program import program
+import constant as cnst
 
- 
 
 def gui():
+
+    
 
     def select_class():
         header.config(text=f"Выбран {selected_class.get()}")
@@ -21,7 +23,7 @@ def gui():
         root.update()
         target_column = "10" if selected_class.get() == "Instance class" else "1"
         program(target_column,  forecast_check.get())
-        label["text"] = f"Модели успешно построены.\nРезультаты тестирования моделей смотрите в файле results.txt."
+        label["text"] = f"Модели успешно построены.\nРезультаты тестирования моделей смотрите в файле {cnst.testing_result_file}."
         btn["state"] = ["enabled"]
 
 

@@ -1,9 +1,12 @@
-from classification import test_classification_models
+import constant as cnst
 import dataset_open as dst
+
 from data_processing import prepare_X_y, preprocessing
+from classification import test_classification_models
 
 
 def program(target_column="10", fit_model=None):
+
 
     dst.dataset_prepare()
     data = dst.dataset_open()
@@ -19,7 +22,7 @@ def program(target_column="10", fit_model=None):
     print(results)
 
     header = ["name", "model", "res.mean", "metric", "time"]
-    with open("test_model_result.txt", "w") as file:
+    with open(cnst.testing_result_file, "w") as file:
         file.write(', '.join(header)+'\n')
         file.write('\n'.join([', '.join(map(str,res)) for res in results]))
 

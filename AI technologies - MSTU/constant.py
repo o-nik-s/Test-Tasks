@@ -1,0 +1,1 @@
+testing_result_file = 'test_model_result.txt'
